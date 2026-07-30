@@ -10,7 +10,7 @@ class AppTheme {
       colorScheme: AppColors.lightColorScheme,
       textTheme: AppTypography.textTheme,
       scaffoldBackgroundColor: AppColors.backgroundLight,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceLight,
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
@@ -21,7 +21,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceLight,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
       ),
@@ -54,7 +54,7 @@ class AppTheme {
       colorScheme: AppColors.darkColorScheme,
       textTheme: AppTypography.textTheme,
       scaffoldBackgroundColor: AppColors.backgroundDark,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
@@ -65,7 +65,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
       ),

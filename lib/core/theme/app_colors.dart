@@ -39,8 +39,7 @@ class AppColors {
         onSecondary: Colors.white,
         error: error,
         onError: Colors.white,
-        background: backgroundLight,
-        onBackground: textPrimaryLight,
+
         surface: surfaceLight,
         onSurface: textPrimaryLight,
       );
@@ -53,8 +52,7 @@ class AppColors {
         onSecondary: Colors.white,
         error: error,
         onError: Colors.white,
-        background: backgroundDark,
-        onBackground: textPrimaryDark,
+
         surface: surfaceDark,
         onSurface: textPrimaryDark,
       );

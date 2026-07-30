@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'logger.dart';
+import '../logging/logger.dart';
 
 void setupErrorHandler() {
   FlutterError.onError = (FlutterErrorDetails details) {
