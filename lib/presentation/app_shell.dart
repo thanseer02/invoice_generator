@@ -17,7 +17,6 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isDesktop = width >= 800;
-    final isTablet = width >= 600 && width < 800;
     final isMobile = width < 600;
 
     final destinations = [

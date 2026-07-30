@@ -191,21 +191,21 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) { 
-      try { await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0'); } catch(e){}
+      try { await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0'); } catch(e){ /* ignore */ }
     }
     if (oldVersion < 3) {
-      try { await db.execute('ALTER TABLE products ADD COLUMN sku TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN discount REAL DEFAULT 0.0'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN unit TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN category TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN sku TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN discount REAL DEFAULT 0.0'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN unit TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN category TEXT'); } catch(e){ /* ignore */ }
     }
     if (oldVersion < 4) {
-      try { await db.execute('ALTER TABLE invoices ADD COLUMN terms TEXT'); } catch(e){}
-      try { await db.execute("ALTER TABLE invoices ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch(e){}
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN terms TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute("ALTER TABLE invoices ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch(e){ /* ignore */ }
       try {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS invoice_items (
@@ -220,11 +220,11 @@ class DatabaseHelper {
             FOREIGN KEY (productId) REFERENCES products (id) ON DELETE SET NULL
           )
         ''');
-      } catch (e) {}
+      } catch (e) { /* ignore */ }
     }
     if (oldVersion < 5) {
-      try { await db.execute('ALTER TABLE invoices ADD COLUMN isRecurring INTEGER DEFAULT 0'); } catch(e){}
-      try { await db.execute('ALTER TABLE invoices ADD COLUMN recurringFrequency TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN isRecurring INTEGER DEFAULT 0'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN recurringFrequency TEXT'); } catch(e){ /* ignore */ }
     }
     if (oldVersion < 6) {
       await db.execute('''
@@ -256,10 +256,10 @@ class DatabaseHelper {
           details TEXT
         )
       ''');
-      try { await db.execute('ALTER TABLE customers ADD COLUMN companyId TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE products ADD COLUMN companyId TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE invoices ADD COLUMN companyId TEXT'); } catch(e){}
-      try { await db.execute('ALTER TABLE expenses ADD COLUMN companyId TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE customers ADD COLUMN companyId TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE products ADD COLUMN companyId TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN companyId TEXT'); } catch(e){ /* ignore */ }
+      try { await db.execute('ALTER TABLE expenses ADD COLUMN companyId TEXT'); } catch(e){ /* ignore */ }
     }
   }
 
