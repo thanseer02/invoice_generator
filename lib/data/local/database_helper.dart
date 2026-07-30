@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static const _databaseName = "invoice_generator.db";
-  static const _databaseVersion = 1;
+  static const _databaseVersion = 2;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -43,6 +43,9 @@ class DatabaseHelper {
         email TEXT,
         phone TEXT,
         address TEXT,
+        gstNumber TEXT,
+        notes TEXT,
+        isFavorite INTEGER DEFAULT 0,
         createdAt TEXT,
         updatedAt TEXT
       )
@@ -141,9 +144,11 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Handle database migrations sequentially based on version number
-    // if (oldVersion < 2) { 
-    //   await db.execute('ALTER TABLE ...');
-    // }
+    if (oldVersion < 2) { 
+      await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT');
+      await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT');
+      await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0');
+    }
   }
 
   Future<void> _seedInitialData(Database db) async {

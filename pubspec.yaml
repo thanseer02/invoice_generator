@@ -57,6 +57,8 @@ dependencies:
   sign_in_with_apple: ^8.1.0
   fl_chart: ^1.2.0
   flutter_animate: ^4.5.2
+  url_launcher: ^6.3.2
+  csv: ^8.0.0
 
 dev_dependencies:
   flutter_test:
