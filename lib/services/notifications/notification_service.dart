@@ -32,7 +32,7 @@ class NotificationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
         // Handle tap
       },
@@ -100,8 +100,8 @@ class NotificationService {
 
   Future<void> cancelReminder(String invoiceId) async {
     final id = _generateNotificationId(invoiceId);
-    await _notificationsPlugin.cancel(id);
-    await _notificationsPlugin.cancel(id + 1);
+    await _notificationsPlugin.cancel(id: id);
+    await _notificationsPlugin.cancel(id: id + 1);
   }
 
   Future<void> _scheduleNotification({
@@ -111,11 +111,11 @@ class NotificationService {
     required DateTime scheduledDate,
   }) async {
     await _notificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const NotificationDetails(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'invoice_reminders',
           'Invoice Reminders',
@@ -130,7 +130,6 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 }

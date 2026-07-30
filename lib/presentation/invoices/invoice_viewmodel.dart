@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/models/invoice.dart';
 import '../../domain/repositories/invoice_repository.dart';
-import '../../domain/models/invoice_item.dart';
 import '../../services/notifications/notification_service.dart';
 
 class InvoiceViewModel extends ChangeNotifier {
