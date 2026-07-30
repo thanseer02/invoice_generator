@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import 'customer_viewmodel.dart';
+import '../../../widgets/cards/app_card.dart';
 import '../../../widgets/layout/responsive_layout.dart';
 
 class CustomersListScreen extends StatelessWidget {
