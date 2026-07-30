@@ -6,18 +6,22 @@ import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/logging/logger.dart';
 import 'core/error/error_handler.dart';
+import 'core/providers/auth_provider.dart';
+import 'data/repositories/firebase_auth_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
-  runZonedGuarded(() {
+  runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // await Firebase.initializeApp(); // TODO: Uncomment when Firebase config is generated
     setupLogger();
     setupErrorHandler();
     
     runApp(
       MultiProvider(
         providers: [
-          // TODO: Add your global providers here
-          Provider<int>.value(value: 42), // Dummy provider to satisfy MultiProvider
+          ChangeNotifierProvider(create: (_) => AuthProvider(FirebaseAuthRepository())),
         ],
         child: const InvoiceApp(),
       ),
@@ -27,8 +31,21 @@ void main() {
   });
 }
 
-class InvoiceApp extends StatelessWidget {
+class InvoiceApp extends StatefulWidget {
   const InvoiceApp({super.key});
+
+  @override
+  State<InvoiceApp> createState() => _InvoiceAppState();
+}
+
+class _InvoiceAppState extends State<InvoiceApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createRouter(context.read<AuthProvider>());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +54,7 @@ class InvoiceApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      routerConfig: appRouter,
-      // localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: _router,
     );
   }
 }
