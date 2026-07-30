@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:sign_in_with_apple/sign_in_with_apple.dart'; // Uncomment when Apple is configured
 import '../../domain/models/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
-
-  FirebaseAuthRepository({FirebaseAuth? firebaseAuth, GoogleSignIn? googleSignIn})
-      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+  FirebaseAuthRepository({FirebaseAuth? firebaseAuth})
+      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
   Stream<AppUser?> get authStateChanges {
@@ -46,26 +43,16 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw FirebaseAuthException(code: 'ERROR_ABORTED_BY_USER', message: 'Sign in aborted by user');
-    }
-
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    final OAuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-    return AppUser.fromFirebaseUser(userCredential.user!);
+    // Placeholder for Google Sign In implementation.
+    // Requires physical device configuration and Firebase Setup.
+    throw UnimplementedError('Google Sign In requires Firebase configuration.');
   }
 
   @override
   Future<AppUser> signInWithApple() async {
     // Placeholder for Apple Sign In implementation.
     // Requires sign_in_with_apple package and proper Apple Developer setup.
-    throw UnimplementedError('Apple Sign In requires physical device configuration.');
+    throw UnimplementedError('Apple Sign In requires Apple Developer configuration.');
   }
 
   @override
@@ -76,9 +63,6 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await Future.wait([
-      _firebaseAuth.signOut(),
-      _googleSignIn.signOut(),
-    ]);
+    await _firebaseAuth.signOut();
   }
 }
