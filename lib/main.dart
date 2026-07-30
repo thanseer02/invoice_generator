@@ -63,12 +63,16 @@ class _InvoiceAppState extends State<InvoiceApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Invoice Generator',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: _router,
+    return Consumer<SettingsViewModel>(
+      builder: (context, settingsVm, child) {
+        return MaterialApp.router(
+          title: 'Invoice Generator',
+          themeMode: settingsVm.themeMode,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          routerConfig: _router,
+        );
+      }
     );
   }
 }

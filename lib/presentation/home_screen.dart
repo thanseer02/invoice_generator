@@ -35,10 +35,30 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.notifications_none),
               onPressed: () {},
             ),
-            const SizedBox(width: AppSpacing.sm),
-            const CircleAvatar(child: Icon(Icons.person)),
-            const SizedBox(width: AppSpacing.md),
+            IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {},
+            ),
           ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(color: Colors.indigo),
+                child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_applications),
+                title: const Text('App Settings'),
+                onTap: () {
+                  Navigator.pop(context); // close drawer
+                  context.push('/app-settings');
+                },
+              ),
+            ],
+          ),
         ),
         body: Consumer<DashboardViewModel>(
           builder: (context, viewModel, child) {
