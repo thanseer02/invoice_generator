@@ -68,6 +68,11 @@ class InvoiceDetailScreen extends StatelessWidget {
               ),
             ],
           ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => context.push('/invoices/\${invoice!.id}/preview'),
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Preview PDF'),
+          ),
           body: SingleChildScrollView(
             padding: AppSpacing.edgeInsetsAllLg,
             child: Column(
