@@ -4,6 +4,7 @@ enum InvoiceStatus { draft, pending, paid, cancelled }
 
 class Invoice {
   final String id;
+  final String? companyId;
   final String invoiceNumber;
   final String customerId;
   final DateTime issueDate;
@@ -24,6 +25,7 @@ class Invoice {
 
   Invoice({
     required this.id,
+    this.companyId,
     required this.invoiceNumber,
     required this.customerId,
     required this.issueDate,
@@ -46,6 +48,7 @@ class Invoice {
   factory Invoice.fromJson(Map<String, dynamic> json) {
     return Invoice(
       id: json['id'] as String,
+      companyId: json['companyId'] as String?,
       invoiceNumber: json['invoiceNumber'] as String,
       customerId: json['customerId'] as String,
       issueDate: DateTime.parse(json['issueDate'] as String),
@@ -75,6 +78,7 @@ class Invoice {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'companyId': companyId,
       'invoiceNumber': invoiceNumber,
       'customerId': customerId,
       'issueDate': issueDate.toIso8601String(),
@@ -97,6 +101,7 @@ class Invoice {
 
   Invoice copyWith({
     String? id,
+    String? companyId,
     String? invoiceNumber,
     String? customerId,
     DateTime? issueDate,
@@ -117,6 +122,7 @@ class Invoice {
   }) {
     return Invoice(
       id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       customerId: customerId ?? this.customerId,
       issueDate: issueDate ?? this.issueDate,

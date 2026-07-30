@@ -1,5 +1,6 @@
 class Expense {
   final String id;
+  final String? companyId;
   final String category;
   final double amount;
   final DateTime expenseDate;
@@ -10,6 +11,7 @@ class Expense {
 
   Expense({
     required this.id,
+    this.companyId,
     required this.category,
     required this.amount,
     required this.expenseDate,
@@ -22,6 +24,7 @@ class Expense {
   factory Expense.fromJson(Map<String, dynamic> json) {
     return Expense(
       id: json['id'] as String,
+      companyId: json['companyId'] as String?,
       category: json['category'] as String,
       amount: (json['amount'] as num).toDouble(),
       expenseDate: DateTime.parse(json['expenseDate'] as String),
@@ -35,6 +38,7 @@ class Expense {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'companyId': companyId,
       'category': category,
       'amount': amount,
       'expenseDate': expenseDate.toIso8601String(),
@@ -47,6 +51,7 @@ class Expense {
 
   Expense copyWith({
     String? id,
+    String? companyId,
     String? category,
     double? amount,
     DateTime? expenseDate,
@@ -57,6 +62,7 @@ class Expense {
   }) {
     return Expense(
       id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
       category: category ?? this.category,
       amount: amount ?? this.amount,
       expenseDate: expenseDate ?? this.expenseDate,

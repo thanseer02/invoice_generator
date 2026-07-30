@@ -1,5 +1,6 @@
 class Product {
   final String id;
+  final String? companyId;
   final String name;
   final String? description;
   final double price;
@@ -15,6 +16,7 @@ class Product {
 
   Product({
     required this.id,
+    this.companyId,
     required this.name,
     this.description,
     required this.price,
@@ -32,6 +34,7 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'] as String,
+      companyId: json['companyId'] as String?,
       name: json['name'] as String,
       description: json['description'] as String?,
       price: (json['price'] as num).toDouble(),
@@ -50,6 +53,7 @@ class Product {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'companyId': companyId,
       'name': name,
       'description': description,
       'price': price,
@@ -67,6 +71,7 @@ class Product {
 
   Product copyWith({
     String? id,
+    String? companyId,
     String? name,
     String? description,
     double? price,
@@ -82,6 +87,7 @@ class Product {
   }) {
     return Product(
       id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
       name: name ?? this.name,
       description: description ?? this.description,
       price: price ?? this.price,

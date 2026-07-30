@@ -1,5 +1,6 @@
 class Customer {
   final String id;
+  final String? companyId;
   final String name;
   final String? email;
   final String? phone;
@@ -12,6 +13,7 @@ class Customer {
 
   Customer({
     required this.id,
+    this.companyId,
     required this.name,
     this.email,
     this.phone,
@@ -26,6 +28,7 @@ class Customer {
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
       id: json['id'] as String,
+      companyId: json['companyId'] as String?,
       name: json['name'] as String,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
@@ -41,6 +44,7 @@ class Customer {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'companyId': companyId,
       'name': name,
       'email': email,
       'phone': phone,
@@ -55,6 +59,7 @@ class Customer {
 
   Customer copyWith({
     String? id,
+    String? companyId,
     String? name,
     String? email,
     String? phone,
@@ -67,6 +72,7 @@ class Customer {
   }) {
     return Customer(
       id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,

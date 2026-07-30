@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static const _databaseName = "invoice_generator.db";
-  static const _databaseVersion = 5;
+  static const _databaseVersion = 6;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -35,10 +35,44 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Phase 1 SaaS Tables
+    await db.execute('''
+      CREATE TABLE companies (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE users (
+        id TEXT PRIMARY KEY,
+        companyId TEXT,
+        email TEXT,
+        displayName TEXT,
+        isGuest INTEGER DEFAULT 0,
+        role TEXT DEFAULT 'admin'
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE audit_logs (
+        id TEXT PRIMARY KEY,
+        companyId TEXT NOT NULL,
+        userId TEXT NOT NULL,
+        entity TEXT NOT NULL,
+        entityId TEXT NOT NULL,
+        action TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        details TEXT
+      )
+    ''');
+
     // Customers Table
     await db.execute('''
       CREATE TABLE customers (
         id TEXT PRIMARY KEY,
+        companyId TEXT,
         name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
@@ -55,6 +89,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE products (
         id TEXT PRIMARY KEY,
+        companyId TEXT,
         name TEXT NOT NULL,
         description TEXT,
         price REAL NOT NULL,
@@ -74,6 +109,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE invoices (
         id TEXT PRIMARY KEY,
+        companyId TEXT,
         invoiceNumber TEXT NOT NULL,
         customerId TEXT NOT NULL,
         issueDate TEXT NOT NULL,
@@ -126,6 +162,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE expenses (
         id TEXT PRIMARY KEY,
+        companyId TEXT,
         category TEXT NOT NULL,
         amount REAL NOT NULL,
         expenseDate TEXT NOT NULL,
@@ -153,36 +190,76 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle database migrations sequentially based on version number
     if (oldVersion < 2) { 
-      await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT');
-      await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT');
-      await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0');
+      try { await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0'); } catch(e){}
     }
     if (oldVersion < 3) {
-      await db.execute('ALTER TABLE products ADD COLUMN sku TEXT');
-      await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
-      await db.execute('ALTER TABLE products ADD COLUMN discount REAL DEFAULT 0.0');
-      await db.execute('ALTER TABLE products ADD COLUMN unit TEXT');
-      await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT');
-      await db.execute('ALTER TABLE products ADD COLUMN category TEXT');
+      try { await db.execute('ALTER TABLE products ADD COLUMN sku TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN discount REAL DEFAULT 0.0'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN unit TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN category TEXT'); } catch(e){}
     }
     if (oldVersion < 4) {
-      await db.execute('ALTER TABLE invoices ADD COLUMN terms TEXT');
-      await db.execute("ALTER TABLE invoices ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'");
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN terms TEXT'); } catch(e){}
+      try { await db.execute("ALTER TABLE invoices ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch(e){}
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS invoice_items (
+            id TEXT PRIMARY KEY,
+            invoiceId TEXT NOT NULL,
+            productId TEXT,
+            description TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            unitPrice REAL NOT NULL,
+            total REAL NOT NULL,
+            FOREIGN KEY (invoiceId) REFERENCES invoices (id) ON DELETE CASCADE,
+            FOREIGN KEY (productId) REFERENCES products (id) ON DELETE SET NULL
+          )
+        ''');
+      } catch (e) {}
+    }
+    if (oldVersion < 5) {
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN isRecurring INTEGER DEFAULT 0'); } catch(e){}
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN recurringFrequency TEXT'); } catch(e){}
+    }
+    if (oldVersion < 6) {
       await db.execute('''
-        CREATE TABLE invoice_items (
+        CREATE TABLE IF NOT EXISTS companies (
           id TEXT PRIMARY KEY,
-          invoiceId TEXT NOT NULL,
-          productId TEXT,
-          description TEXT NOT NULL,
-          quantity INTEGER NOT NULL,
-          unitPrice REAL NOT NULL,
-          total REAL NOT NULL,
-          FOREIGN KEY (invoiceId) REFERENCES invoices (id) ON DELETE CASCADE,
-          FOREIGN KEY (productId) REFERENCES products (id) ON DELETE SET NULL
+          name TEXT NOT NULL,
+          createdAt TEXT NOT NULL
         )
       ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          companyId TEXT,
+          email TEXT,
+          displayName TEXT,
+          isGuest INTEGER DEFAULT 0,
+          role TEXT DEFAULT 'admin'
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id TEXT PRIMARY KEY,
+          companyId TEXT NOT NULL,
+          userId TEXT NOT NULL,
+          entity TEXT NOT NULL,
+          entityId TEXT NOT NULL,
+          action TEXT NOT NULL,
+          timestamp TEXT NOT NULL,
+          details TEXT
+        )
+      ''');
+      try { await db.execute('ALTER TABLE customers ADD COLUMN companyId TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE products ADD COLUMN companyId TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE invoices ADD COLUMN companyId TEXT'); } catch(e){}
+      try { await db.execute('ALTER TABLE expenses ADD COLUMN companyId TEXT'); } catch(e){}
     }
   }
 
