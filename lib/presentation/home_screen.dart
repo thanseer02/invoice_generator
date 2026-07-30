@@ -6,6 +6,8 @@ import '../widgets/feedback/app_snackbar.dart';
 import '../widgets/feedback/app_dialogs.dart';
 import '../widgets/pickers/app_date_picker.dart';
 import '../utils/formatters/currency_formatter.dart';
+import '../data/local/database_helper.dart';
+import '../data/repositories/sqlite_settings_repository.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -82,6 +84,27 @@ class HomeScreen extends StatelessWidget {
           Text(
             'Formatted value: ${CurrencyFormatter.format(1234.56)}',
             style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 32),
+          Text('Database Verification', style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 16),
+          AppButton(
+            text: 'Test Local DB',
+            onPressed: () async {
+              try {
+                final dbHelper = DatabaseHelper.instance;
+                await dbHelper.database; // Initializes the database
+                final settingsRepo = SqliteSettingsRepository();
+                final settings = await settingsRepo.getAllSettings();
+                if (context.mounted) {
+                  AppSnackbar.showSuccess(context, 'DB Init OK! Found ${settings.length} settings seeded.');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  AppSnackbar.showError(context, 'DB Error: $e');
+                }
+              }
+            },
           ),
         ],
       ),
