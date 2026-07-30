@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../widgets/cards/app_card.dart';
 
@@ -26,7 +27,12 @@ class QuickActionsPanel extends StatelessWidget {
               ActionChip(
                 label: const Text('Add Customer'),
                 avatar: const Icon(Icons.person_add, size: 16),
-                onPressed: () {},
+                onPressed: () => context.push('/customers/add'),
+              ),
+              ActionChip(
+                label: const Text('View Customers'),
+                avatar: const Icon(Icons.people, size: 16),
+                onPressed: () => context.push('/customers'),
               ),
               ActionChip(
                 label: const Text('Add Product'),

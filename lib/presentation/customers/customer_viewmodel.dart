@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
@@ -123,12 +122,13 @@ class CustomerViewModel extends ChangeNotifier {
       ]);
     }
 
-    String csv = const ListToCsvConverter().convert(csvData);
+    String csv = csvData.map((row) => row.map((e) => '"${e.replaceAll('"', '""')}"').join(',')).join('\n');
     final directory = await getApplicationDocumentsDirectory();
-    final path = '\${directory.path}/customers_export.csv';
+    final path = '${directory.path}/customers_export.csv';
     final file = File(path);
     await file.writeAsString(csv);
 
+    // ignore: deprecated_member_use
     await Share.shareXFiles([XFile(path)], text: 'Customers Export');
   }
 
@@ -140,7 +140,8 @@ class CustomerViewModel extends ChangeNotifier {
 
     if (result != null && result.files.single.path != null) {
       final input = File(result.files.single.path!).openRead();
-      final fields = await input.transform(const Utf8Decoder()).transform(const CsvToListConverter()).toList();
+      final csvString = await input.transform(const Utf8Decoder()).join();
+      final fields = csvString.split('\n').map((e) => e.split(',')).toList();
 
       if (fields.length > 1) { // Skip header
         for (var i = 1; i < fields.length; i++) {

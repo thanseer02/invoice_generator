@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import 'customer_viewmodel.dart';
-import '../../../widgets/cards/app_card.dart';
-import '../../../widgets/inputs/app_text_field.dart';
 import '../../../widgets/layout/responsive_layout.dart';
 
 class CustomersListScreen extends StatelessWidget {
@@ -84,9 +82,12 @@ class CustomersListScreen extends StatelessWidget {
   }
 
   Widget _buildSearch(CustomerViewModel viewModel) {
-    return AppTextField(
-      hintText: 'Search by name, email or GST...',
-      prefixIcon: const Icon(Icons.search),
+    return TextField(
+      decoration: const InputDecoration(
+        hintText: 'Search by name, email or GST...',
+        prefixIcon: Icon(Icons.search),
+        border: OutlineInputBorder(),
+      ),
       onChanged: viewModel.setSearchQuery,
     );
   }
