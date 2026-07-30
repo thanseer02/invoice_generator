@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import '../../domain/models/invoice.dart';
 import '../../domain/repositories/invoice_repository.dart';
 
@@ -8,6 +9,13 @@ class AnalyticsService {
 
   Future<Map<String, dynamic>> crunchMetrics(DateTime start, DateTime end) async {
     final allInvoices = await _invoiceRepo.getAllInvoices();
+    
+    return await Isolate.run(() {
+      return _processData(allInvoices, start, end);
+    });
+  }
+
+  static Map<String, dynamic> _processData(List<Invoice> allInvoices, DateTime start, DateTime end) {
     
     // Filter invoices by date range
     final periodInvoices = allInvoices.where((i) => 
