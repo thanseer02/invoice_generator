@@ -81,7 +81,7 @@ class InvoiceViewModel extends ChangeNotifier {
     
     final newInvoice = invoice.copyWith(
       id: newInvoiceId,
-      invoiceNumber: '\${invoice.invoiceNumber}-COPY',
+      invoiceNumber: '${invoice.invoiceNumber}-COPY',
       status: InvoiceStatus.draft,
       items: newItems,
       issueDate: DateTime.now(),

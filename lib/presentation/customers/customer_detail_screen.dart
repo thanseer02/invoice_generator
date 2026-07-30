@@ -52,7 +52,7 @@ class CustomerDetailScreen extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () => context.push('/customers/\${customer!.id}/edit'),
+                onPressed: () => context.push('/customers/${customer!.id}/edit'),
               ),
               IconButton(
                 icon: const Icon(Icons.delete, color: AppColors.error),
@@ -115,13 +115,13 @@ class CustomerDetailScreen extends StatelessWidget {
           ActionChip(
             avatar: const Icon(Icons.phone, size: 16),
             label: const Text('Call'),
-            onPressed: () => _launchUrl('tel:\${customer.phone}'),
+            onPressed: () => _launchUrl('tel:${customer.phone}'),
           ),
         if (customer.email != null && customer.email!.isNotEmpty)
           ActionChip(
             avatar: const Icon(Icons.email, size: 16),
             label: const Text('Email'),
-            onPressed: () => _launchUrl('mailto:\${customer.email}'),
+            onPressed: () => _launchUrl('mailto:${customer.email}'),
           ),
         ActionChip(
           avatar: const Icon(Icons.receipt_long, size: 16),

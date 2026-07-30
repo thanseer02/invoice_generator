@@ -46,7 +46,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   @override
   void initState() {
     super.initState();
-    _invoiceNumController = TextEditingController(text: 'INV-\${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}');
+    _invoiceNumController = TextEditingController(text: 'INV-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}');
     _notesController = TextEditingController();
     _termsController = TextEditingController();
     _discountController = TextEditingController(text: '0');
@@ -277,7 +277,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
-                          child: Text('\$\${item.total.toStringAsFixed(2)}'),
+                          child: Text('\$${item.total.toStringAsFixed(2)}'),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -354,7 +354,7 @@ class _ProductSelectorSheet extends StatelessWidget {
             final p = vm.products[index];
             return ListTile(
               title: Text(p.name),
-              subtitle: Text('\$\${p.price.toStringAsFixed(2)}'),
+              subtitle: Text('\$${p.price.toStringAsFixed(2)}'),
               onTap: () => onProductSelected(p),
             );
           },

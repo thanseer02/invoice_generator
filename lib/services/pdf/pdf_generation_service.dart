@@ -17,7 +17,7 @@ class PdfGenerationService {
     String companyAddress = '742 Evergreen Terrace, Springfield',
   }) async {
     final pdf = pw.Document(
-      title: 'Invoice \${invoice.invoiceNumber}',
+      title: 'Invoice ${invoice.invoiceNumber}',
       author: companyName,
       creator: 'Invoice Generator App',
     );

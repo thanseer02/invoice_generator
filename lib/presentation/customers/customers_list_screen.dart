@@ -162,7 +162,7 @@ class CustomersListScreen extends StatelessWidget {
                   const Icon(Icons.chevron_right),
                 ],
               ),
-              onTap: () => context.push('/customers/\${customer.id}'),
+              onTap: () => context.push('/customers/${customer.id}'),
             ),
           ),
         );

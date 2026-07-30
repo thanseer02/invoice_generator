@@ -19,8 +19,8 @@ class PdfUtils {
           children: [
             pw.Text('Invoice #$invoiceNum', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
             pw.SizedBox(height: 4),
-            pw.Text('Issue Date: \${dateFormat.format(issueDate)}'),
-            pw.Text('Due Date: \${dateFormat.format(dueDate)}'),
+            pw.Text('Issue Date: ${dateFormat.format(issueDate)}'),
+            pw.Text('Due Date: ${dateFormat.format(dueDate)}'),
           ],
         ),
       ],
@@ -55,7 +55,7 @@ class PdfUtils {
             if (customer?.address != null && customer!.address!.isNotEmpty) pw.Text(customer.address!),
             if (customer?.email != null && customer!.email!.isNotEmpty) pw.Text(customer.email!),
             if (customer?.phone != null && customer!.phone!.isNotEmpty) pw.Text(customer.phone!),
-            if (customer?.gstNumber != null && customer!.gstNumber!.isNotEmpty) pw.Text('GST: \${customer.gstNumber!}'),
+            if (customer?.gstNumber != null && customer!.gstNumber!.isNotEmpty) pw.Text('GST: ${customer.gstNumber!}'),
           ],
         ),
       ],
@@ -76,7 +76,7 @@ class ClassicTemplate {
       footer: (context) => pw.Container(
         alignment: pw.Alignment.centerRight,
         margin: const pw.EdgeInsets.only(top: 20),
-        child: pw.Text('Page \${context.pageNumber} of \${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey)),
+        child: pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey)),
       ),
       build: (context) => [
         PdfUtils.buildCompanyCustomerInfo(cName, cEmail, cPhone, cAddress, customer),
@@ -96,11 +96,11 @@ class ClassicTemplate {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('Subtotal: \${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-              if (invoice.discount > 0) pw.Text('Discount: -\${PdfUtils.currencyFormat.format(invoice.discount)}'),
-              if (invoice.taxAmount > 0) pw.Text('Tax: \${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+              pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
+              if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
+              if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
               pw.Container(width: 120, child: pw.Divider(color: PdfColors.grey400)),
-              pw.Text('Total: \${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+              pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
             ]
           )
         ),
@@ -134,7 +134,7 @@ class ClassicTemplate {
         pw.Container(
           width: 60,
           height: 60,
-          child: pw.BarcodeWidget(barcode: pw.Barcode.qrCode(), data: 'INV:\${invoice.invoiceNumber}|TOTAL:\${invoice.total}')
+          child: pw.BarcodeWidget(barcode: pw.Barcode.qrCode(), data: 'INV:${invoice.invoiceNumber}|TOTAL:${invoice.total}')
         )
       ]
     );
@@ -155,14 +155,14 @@ class ModernTemplate {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text('INVOICE', style: pw.TextStyle(fontSize: 32, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
-            pw.Text('#\${invoice.invoiceNumber}', style: pw.TextStyle(fontSize: 20, color: PdfColors.white)),
+            pw.Text('#${invoice.invoiceNumber}', style: pw.TextStyle(fontSize: 20, color: PdfColors.white)),
           ]
         )
       ),
       footer: (context) => pw.Container(
         padding: const pw.EdgeInsets.all(32),
         alignment: pw.Alignment.center,
-        child: pw.Text('Page \${context.pageNumber} of \${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey)),
+        child: pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey)),
       ),
       build: (context) => [
         pw.Padding(
@@ -188,11 +188,11 @@ class ModernTemplate {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
-                    pw.Text('Subtotal: \${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-                    if (invoice.discount > 0) pw.Text('Discount: -\${PdfUtils.currencyFormat.format(invoice.discount)}'),
-                    if (invoice.taxAmount > 0) pw.Text('Tax: \${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+                    pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
+                    if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
+                    if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
                     pw.SizedBox(height: 10),
-                    pw.Text('Total: \${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20, color: primaryColor)),
+                    pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20, color: primaryColor)),
                   ]
                 )
               ),
@@ -234,7 +234,7 @@ class MinimalTemplate {
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.SizedBox(height: 10),
-              pw.Text('Total due: \${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 24)),
+              pw.Text('Total due: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 24)),
             ]
           )
         ),
@@ -291,9 +291,9 @@ class CorporateTemplate {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text('INVOICE DETAILS', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                pw.Text('Number: \${invoice.invoiceNumber}'),
-                pw.Text('Issue Date: \${PdfUtils.dateFormat.format(invoice.issueDate)}'),
-                pw.Text('Due Date: \${PdfUtils.dateFormat.format(invoice.dueDate)}'),
+                pw.Text('Number: ${invoice.invoiceNumber}'),
+                pw.Text('Issue Date: ${PdfUtils.dateFormat.format(invoice.issueDate)}'),
+                pw.Text('Due Date: ${PdfUtils.dateFormat.format(invoice.dueDate)}'),
               ]
             ),
           ]
@@ -314,11 +314,11 @@ class CorporateTemplate {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('Subtotal: \${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-              if (invoice.discount > 0) pw.Text('Discount: -\${PdfUtils.currencyFormat.format(invoice.discount)}'),
-              if (invoice.taxAmount > 0) pw.Text('Tax: \${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+              pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
+              if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
+              if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
               pw.Container(width: 150, child: pw.Divider()),
-              pw.Text('Total: \${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+              pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
             ]
           )
         ),

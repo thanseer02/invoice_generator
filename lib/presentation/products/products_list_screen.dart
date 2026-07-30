@@ -180,15 +180,15 @@ class ProductsListScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('\${format.format(product.price)} \${product.unit != null ? "per \${product.unit}" : ""}',
+            Text('${format.format(product.price)} ${product.unit != null ? "per ${product.unit}" : ""}',
                 style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
             if (product.sku != null && product.sku!.isNotEmpty)
-              Text('SKU: \${product.sku}', style: const TextStyle(fontSize: 12)),
+              Text('SKU: ${product.sku}', style: const TextStyle(fontSize: 12)),
           ],
         ),
         trailing: PopupMenuButton<String>(
           onSelected: (val) {
-            if (val == 'edit') context.push('/products/\${product.id}/edit');
+            if (val == 'edit') context.push('/products/${product.id}/edit');
             if (val == 'delete') viewModel.deleteProduct(product.id);
           },
           itemBuilder: (context) => [
@@ -196,7 +196,7 @@ class ProductsListScreen extends StatelessWidget {
             const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: AppColors.error))),
           ],
         ),
-        onTap: () => context.push('/products/\${product.id}/edit'),
+        onTap: () => context.push('/products/${product.id}/edit'),
       ),
     );
   }

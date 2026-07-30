@@ -40,7 +40,7 @@ class InvoiceDetailScreen extends StatelessWidget {
               PopupMenuButton<String>(
                 onSelected: (val) async {
                   if (val == 'edit') {
-                    context.push('/invoices/\${invoice!.id}/edit');
+                    context.push('/invoices/${invoice!.id}/edit');
                   } else if (val == 'duplicate') {
                     await viewModel.duplicateInvoice(invoice!);
                     if (context.mounted) {
@@ -69,7 +69,7 @@ class InvoiceDetailScreen extends StatelessWidget {
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => context.push('/invoices/\${invoice!.id}/preview'),
+            onPressed: () => context.push('/invoices/${invoice!.id}/preview'),
             icon: const Icon(Icons.picture_as_pdf),
             label: const Text('Preview PDF'),
           ),
@@ -104,7 +104,7 @@ class InvoiceDetailScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Invoice: \${invoice.invoiceNumber}', style: Theme.of(context).textTheme.titleLarge),
+              Text('Invoice: ${invoice.invoiceNumber}', style: Theme.of(context).textTheme.titleLarge),
               _buildStatusIndicator(invoice.status),
             ],
           ),
@@ -162,8 +162,8 @@ class InvoiceDetailScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(flex: 3, child: Text(item.description)),
-                  Expanded(child: Text('\${item.quantity} x \$\${item.unitPrice.toStringAsFixed(2)}')),
-                  Text('\$\${item.total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Expanded(child: Text('${item.quantity} x \$${item.unitPrice.toStringAsFixed(2)}')),
+                  Text('\$${item.total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -180,7 +180,7 @@ class InvoiceDetailScreen extends StatelessWidget {
         children: [
           _buildTotalRow('Subtotal', currencyFormatter.format(invoice.subtotal)),
           if (invoice.discount > 0)
-            _buildTotalRow('Discount', '-\${currencyFormatter.format(invoice.discount)}'),
+            _buildTotalRow('Discount', '-${currencyFormatter.format(invoice.discount)}'),
           if (invoice.taxAmount > 0)
             _buildTotalRow('Tax', currencyFormatter.format(invoice.taxAmount)),
           const Divider(),

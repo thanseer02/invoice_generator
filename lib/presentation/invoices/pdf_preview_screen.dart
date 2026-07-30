@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:printing/printing.dart';
 
 import '../../domain/models/invoice.dart';
 import '../../domain/models/customer.dart';
 import '../../services/pdf/pdf_generation_service.dart';
+import '../../services/pdf/pdf_export_service.dart';
 import 'invoice_viewmodel.dart';
 import '../customers/customer_viewmodel.dart';
+import '../../../widgets/feedback/app_snackbar.dart';
 
 class PdfPreviewScreen extends StatefulWidget {
   final String invoiceId;
@@ -58,6 +61,25 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
         ),
         canChangeOrientation: false,
         canChangePageFormat: false,
+        actions: [
+          PdfPreviewAction(
+            icon: const Icon(Icons.save),
+            onPressed: (context, build, pageFormat) async {
+              final bytes = await build(pageFormat);
+              final path = await PdfExportService.savePdfLocally(bytes, 'Invoice_${invoice!.invoiceNumber}.pdf');
+              if (context.mounted && path != null) {
+                AppSnackbar.showSuccess(context, kIsWeb ? 'Downloaded' : 'Saved to $path');
+              }
+            },
+          ),
+          PdfPreviewAction(
+            icon: const Icon(Icons.email),
+            onPressed: (context, build, pageFormat) async {
+              final bytes = await build(pageFormat);
+              await PdfExportService.emailPdf(bytes, 'Invoice_${invoice!.invoiceNumber}.pdf');
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(

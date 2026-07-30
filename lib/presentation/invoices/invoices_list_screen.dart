@@ -135,12 +135,12 @@ class InvoicesListScreen extends StatelessWidget {
                       return Text('To: $customerName');
                     },
                   ),
-                  Text('Due: \${DateFormat.yMMMd().format(invoice.dueDate)}'),
+                  Text('Due: ${DateFormat.yMMMd().format(invoice.dueDate)}'),
                   const SizedBox(height: AppSpacing.xs),
                   _buildStatusIndicator(invoice.status),
                 ],
               ),
-              onTap: () => context.push('/invoices/\${invoice.id}'),
+              onTap: () => context.push('/invoices/${invoice.id}'),
             ),
           ),
         );

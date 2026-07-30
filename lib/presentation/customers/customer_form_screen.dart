@@ -129,7 +129,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (val) {
                   if (val != null && val.isNotEmpty) {
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$');
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                     if (!emailRegex.hasMatch(val)) return 'Enter a valid email';
                   }
                   return null;
