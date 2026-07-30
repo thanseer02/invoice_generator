@@ -23,6 +23,44 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300622168794:android:31f2b73b4ac207dc7c9be3",
+        "android_client_info": {
+          "package_name": "com.invoice_genarator.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUtqC4d6IWnY9sV8RQD4po33yqgg695x8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300622168794:android:898f7abb44dbb6a37c9be3",
+        "android_client_info": {
+          "package_name": "com.invoicegenarator.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUtqC4d6IWnY9sV8RQD4po33yqgg695x8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

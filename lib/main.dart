@@ -17,6 +17,8 @@ import 'presentation/invoices/invoice_viewmodel.dart';
 import 'presentation/expenses/expense_viewmodel.dart';
 import 'presentation/settings/settings_viewmodel.dart';
 import 'data/repositories/sqlite_settings_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'services/analytics/analytics_service.dart';
 import 'presentation/analytics/analytics_viewmodel.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +26,7 @@ import 'package:go_router/go_router.dart';
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    // await Firebase.initializeApp(); // TODO: Uncomment when Firebase config is generated
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     setupLogger();
     setupErrorHandler();
     
