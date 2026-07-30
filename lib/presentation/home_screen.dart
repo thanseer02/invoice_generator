@@ -1,113 +1,146 @@
 import 'package:flutter/material.dart';
-import '../widgets/buttons/app_button.dart';
-import '../widgets/inputs/app_text_field.dart';
-import '../widgets/cards/app_card.dart';
-import '../widgets/feedback/app_snackbar.dart';
-import '../widgets/feedback/app_dialogs.dart';
-import '../widgets/pickers/app_date_picker.dart';
+import 'package:provider/provider.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_colors.dart';
+import '../widgets/layout/responsive_layout.dart';
 import '../utils/formatters/currency_formatter.dart';
-import '../data/local/database_helper.dart';
-import '../data/repositories/sqlite_settings_repository.dart';
+import 'dashboard/dashboard_viewmodel.dart';
+import 'dashboard/widgets/stat_card.dart';
+import 'dashboard/widgets/revenue_expense_chart.dart';
+import 'dashboard/widgets/quick_actions_panel.dart';
+import 'dashboard/widgets/recent_activity_list.dart';
+import '../data/repositories/sqlite_invoice_repository.dart';
+import '../data/repositories/sqlite_expense_repository.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Design System Gallery'),
+    return ChangeNotifierProvider(
+      create: (_) => DashboardViewModel(
+        invoiceRepo: SqliteInvoiceRepository(),
+        expenseRepo: SqliteExpenseRepository(),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dashboard'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_none),
+              onPressed: () {},
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            const CircleAvatar(child: Icon(Icons.person)),
+            const SizedBox(width: AppSpacing.md),
+          ],
+        ),
+        body: Consumer<DashboardViewModel>(
+          builder: (context, viewModel, child) {
+            if (viewModel.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
+            return ResponsiveLayout(
+              mobile: _buildMobileLayout(context, viewModel),
+              desktop: _buildDesktopLayout(context, viewModel),
+            );
+          }
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, DashboardViewModel vm) {
+    return SingleChildScrollView(
+      padding: AppSpacing.edgeInsetsAllLg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Typography', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          const Text('This is Body Large text.'),
-          const SizedBox(height: 32),
-          Text('Buttons', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: [
-              AppButton(text: 'Primary', onPressed: () {}),
-              AppButton(text: 'Secondary', variant: AppButtonVariant.secondary, onPressed: () {}),
-              AppButton(text: 'Outlined', variant: AppButtonVariant.outlined, onPressed: () {}),
-              AppButton(text: 'Text', variant: AppButtonVariant.text, onPressed: () {}),
-            ],
-          ),
-          const SizedBox(height: 32),
-          Text('Inputs', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          const AppTextField(label: 'Username', hint: 'Enter your username'),
-          const SizedBox(height: 32),
-          Text('Feedback & Utilities', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          AppCard(
+          _buildStatsGrid(context, vm, crossAxisCount: 2),
+          const SizedBox(height: AppSpacing.lg),
+          const RevenueExpenseChart(),
+          const SizedBox(height: AppSpacing.lg),
+          const QuickActionsPanel(),
+          const SizedBox(height: AppSpacing.lg),
+          const RecentActivityList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, DashboardViewModel vm) {
+    return SingleChildScrollView(
+      padding: AppSpacing.edgeInsetsAllLg,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 7,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Card Component Example'),
-                const SizedBox(height: 16),
-                AppButton(
-                  text: 'Show Snackbar',
-                  onPressed: () => AppSnackbar.showSuccess(context, 'Operation successful!'),
-                ),
-                const SizedBox(height: 16),
-                AppButton(
-                  text: 'Show Dialog',
-                  variant: AppButtonVariant.secondary,
-                  onPressed: () => AppDialogs.showConfirmDialog(
-                    context,
-                    title: 'Confirm Action',
-                    content: 'Are you sure you want to proceed?',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                AppButton(
-                  text: 'Select Date',
-                  variant: AppButtonVariant.outlined,
-                  onPressed: () => AppDatePicker.selectDate(
-                    context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  ),
-                ),
+                _buildStatsGrid(context, vm, crossAxisCount: 3),
+                const SizedBox(height: AppSpacing.xl),
+                const RevenueExpenseChart(),
               ],
             ),
           ),
-          const SizedBox(height: 32),
-          Text('Currency Formatting', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          Text(
-            'Formatted value: ${CurrencyFormatter.format(1234.56)}',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 32),
-          Text('Database Verification', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          AppButton(
-            text: 'Test Local DB',
-            onPressed: () async {
-              try {
-                final dbHelper = DatabaseHelper.instance;
-                await dbHelper.database; // Initializes the database
-                final settingsRepo = SqliteSettingsRepository();
-                final settings = await settingsRepo.getAllSettings();
-                if (context.mounted) {
-                  AppSnackbar.showSuccess(context, 'DB Init OK! Found ${settings.length} settings seeded.');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  AppSnackbar.showError(context, 'DB Error: $e');
-                }
-              }
-            },
+          const SizedBox(width: AppSpacing.xl),
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: const [
+                QuickActionsPanel(),
+                SizedBox(height: AppSpacing.xl),
+                RecentActivityList(),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStatsGrid(BuildContext context, DashboardViewModel vm, {required int crossAxisCount}) {
+    return GridView.count(
+      crossAxisCount: crossAxisCount,
+      crossAxisSpacing: AppSpacing.md,
+      mainAxisSpacing: AppSpacing.md,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1.5,
+      children: [
+        StatCard(
+          title: "Today's Sales",
+          value: CurrencyFormatter.format(vm.todaysSales),
+          icon: Icons.monetization_on,
+          iconColor: AppColors.primary,
+        ),
+        StatCard(
+          title: 'Monthly Sales',
+          value: CurrencyFormatter.format(vm.monthlySales),
+          icon: Icons.calendar_month,
+          iconColor: AppColors.primary,
+        ),
+        StatCard(
+          title: 'Pending Amount',
+          value: CurrencyFormatter.format(vm.pendingAmount),
+          icon: Icons.pending_actions,
+          iconColor: AppColors.warning,
+        ),
+        StatCard(
+          title: 'Paid Amount',
+          value: CurrencyFormatter.format(vm.paidAmount),
+          icon: Icons.check_circle,
+          iconColor: AppColors.success,
+        ),
+        StatCard(
+          title: 'Total Invoices',
+          value: vm.invoiceCount.toString(),
+          icon: Icons.receipt_long,
+          iconColor: AppColors.secondary,
+        ),
+      ],
     );
   }
 }
