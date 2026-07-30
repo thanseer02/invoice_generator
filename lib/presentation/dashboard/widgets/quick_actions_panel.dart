@@ -37,7 +37,12 @@ class QuickActionsPanel extends StatelessWidget {
               ActionChip(
                 label: const Text('Add Product'),
                 avatar: const Icon(Icons.inventory, size: 16),
-                onPressed: () {},
+                onPressed: () => context.push('/products/add'),
+              ),
+              ActionChip(
+                label: const Text('View Products'),
+                avatar: const Icon(Icons.inventory_2, size: 16),
+                onPressed: () => context.push('/products'),
               ),
               ActionChip(
                 label: const Text('Log Expense'),

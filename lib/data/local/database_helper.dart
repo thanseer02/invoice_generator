@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static const _databaseName = "invoice_generator.db";
-  static const _databaseVersion = 2;
+  static const _databaseVersion = 3;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -59,6 +59,12 @@ class DatabaseHelper {
         description TEXT,
         price REAL NOT NULL,
         taxRate REAL NOT NULL DEFAULT 0.0,
+        sku TEXT,
+        barcode TEXT,
+        discount REAL NOT NULL DEFAULT 0.0,
+        unit TEXT,
+        imagePath TEXT,
+        category TEXT,
         createdAt TEXT,
         updatedAt TEXT
       )
@@ -148,6 +154,14 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE customers ADD COLUMN gstNumber TEXT');
       await db.execute('ALTER TABLE customers ADD COLUMN notes TEXT');
       await db.execute('ALTER TABLE customers ADD COLUMN isFavorite INTEGER DEFAULT 0');
+    }
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE products ADD COLUMN sku TEXT');
+      await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
+      await db.execute('ALTER TABLE products ADD COLUMN discount REAL DEFAULT 0.0');
+      await db.execute('ALTER TABLE products ADD COLUMN unit TEXT');
+      await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT');
+      await db.execute('ALTER TABLE products ADD COLUMN category TEXT');
     }
   }
 

@@ -4,6 +4,8 @@ import '../../presentation/auth/login_screen.dart';
 import '../../presentation/customers/customers_list_screen.dart';
 import '../../presentation/customers/customer_form_screen.dart';
 import '../../presentation/customers/customer_detail_screen.dart';
+import '../../presentation/products/products_list_screen.dart';
+import '../../presentation/products/product_form_screen.dart';
 import '../providers/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
@@ -34,6 +36,20 @@ GoRouter createRouter(AuthProvider authProvider) {
           GoRoute(
             path: ':id/edit',
             builder: (context, state) => CustomerFormScreen(customerId: state.pathParameters['id']),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/products',
+        builder: (context, state) => const ProductsListScreen(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (context, state) => const ProductFormScreen(),
+          ),
+          GoRoute(
+            path: ':id/edit',
+            builder: (context, state) => ProductFormScreen(productId: state.pathParameters['id']),
           ),
         ],
       ),
