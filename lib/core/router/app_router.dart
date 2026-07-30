@@ -6,6 +6,9 @@ import '../../presentation/customers/customer_form_screen.dart';
 import '../../presentation/customers/customer_detail_screen.dart';
 import '../../presentation/products/products_list_screen.dart';
 import '../../presentation/products/product_form_screen.dart';
+import '../../presentation/invoices/invoices_list_screen.dart';
+import '../../presentation/invoices/invoice_form_screen.dart';
+import '../../presentation/invoices/invoice_detail_screen.dart';
 import '../providers/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
@@ -50,6 +53,24 @@ GoRouter createRouter(AuthProvider authProvider) {
           GoRoute(
             path: ':id/edit',
             builder: (context, state) => ProductFormScreen(productId: state.pathParameters['id']),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/invoices',
+        builder: (context, state) => const InvoicesListScreen(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (context, state) => const InvoiceFormScreen(),
+          ),
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => InvoiceDetailScreen(invoiceId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: ':id/edit',
+            builder: (context, state) => InvoiceFormScreen(invoiceId: state.pathParameters['id']),
           ),
         ],
       ),

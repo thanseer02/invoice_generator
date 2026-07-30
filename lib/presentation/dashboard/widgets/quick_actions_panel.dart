@@ -22,7 +22,12 @@ class QuickActionsPanel extends StatelessWidget {
               ActionChip(
                 label: const Text('New Invoice'),
                 avatar: const Icon(Icons.receipt_long, size: 16),
-                onPressed: () {},
+                onPressed: () => context.push('/invoices/add'),
+              ),
+              ActionChip(
+                label: const Text('View Invoices'),
+                avatar: const Icon(Icons.description, size: 16),
+                onPressed: () => context.push('/invoices'),
               ),
               ActionChip(
                 label: const Text('Add Customer'),

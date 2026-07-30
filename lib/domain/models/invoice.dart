@@ -1,4 +1,6 @@
-enum InvoiceStatus { draft, sent, paid, overdue }
+import 'invoice_item.dart';
+
+enum InvoiceStatus { draft, pending, paid, cancelled }
 
 class Invoice {
   final String id;
@@ -12,6 +14,9 @@ class Invoice {
   final double total;
   final InvoiceStatus status;
   final String? notes;
+  final String? terms;
+  final String currency;
+  final List<InvoiceItem> items;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -27,6 +32,9 @@ class Invoice {
     this.total = 0.0,
     this.status = InvoiceStatus.draft,
     this.notes,
+    this.terms,
+    this.currency = 'USD',
+    this.items = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -47,6 +55,12 @@ class Invoice {
         orElse: () => InvoiceStatus.draft,
       ),
       notes: json['notes'] as String?,
+      terms: json['terms'] as String?,
+      currency: json['currency'] as String? ?? 'USD',
+      items: (json['items'] as List<dynamic>?)
+              ?.map((e) => InvoiceItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
     );
@@ -65,6 +79,9 @@ class Invoice {
       'total': total,
       'status': status.name,
       'notes': notes,
+      'terms': terms,
+      'currency': currency,
+      'items': items.map((e) => e.toJson()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -82,6 +99,9 @@ class Invoice {
     double? total,
     InvoiceStatus? status,
     String? notes,
+    String? terms,
+    String? currency,
+    List<InvoiceItem>? items,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -97,6 +117,9 @@ class Invoice {
       total: total ?? this.total,
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      terms: terms ?? this.terms,
+      currency: currency ?? this.currency,
+      items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

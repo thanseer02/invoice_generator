@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static const _databaseName = "invoice_generator.db";
-  static const _databaseVersion = 3;
+  static const _databaseVersion = 4;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -84,9 +84,11 @@ class DatabaseHelper {
         total REAL NOT NULL,
         status TEXT NOT NULL,
         notes TEXT,
+        terms TEXT,
+        currency TEXT NOT NULL DEFAULT 'USD',
         createdAt TEXT,
         updatedAt TEXT,
-        FOREIGN KEY (customerId) REFERENCES customers (id) ON DELETE RESTRICT
+        FOREIGN KEY (customerId) REFERENCES customers (id)
       )
     ''');
 
@@ -162,6 +164,23 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE products ADD COLUMN unit TEXT');
       await db.execute('ALTER TABLE products ADD COLUMN imagePath TEXT');
       await db.execute('ALTER TABLE products ADD COLUMN category TEXT');
+    }
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE invoices ADD COLUMN terms TEXT');
+      await db.execute("ALTER TABLE invoices ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'");
+      await db.execute('''
+        CREATE TABLE invoice_items (
+          id TEXT PRIMARY KEY,
+          invoiceId TEXT NOT NULL,
+          productId TEXT,
+          description TEXT NOT NULL,
+          quantity INTEGER NOT NULL,
+          unitPrice REAL NOT NULL,
+          total REAL NOT NULL,
+          FOREIGN KEY (invoiceId) REFERENCES invoices (id) ON DELETE CASCADE,
+          FOREIGN KEY (productId) REFERENCES products (id) ON DELETE SET NULL
+        )
+      ''');
     }
   }
 

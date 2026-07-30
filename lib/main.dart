@@ -10,8 +10,10 @@ import 'core/providers/auth_provider.dart';
 import 'data/repositories/firebase_auth_repository.dart';
 import 'data/repositories/sqlite_customer_repository.dart';
 import 'data/repositories/sqlite_product_repository.dart';
+import 'data/repositories/sqlite_invoice_repository.dart';
 import 'presentation/customers/customer_viewmodel.dart';
 import 'presentation/products/product_viewmodel.dart';
+import 'presentation/invoices/invoice_viewmodel.dart';
 // import 'package:firebase_core/firebase_core.dart'; // TODO: Uncomment when Firebase config is generated
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +30,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => AuthProvider(FirebaseAuthRepository())),
           ChangeNotifierProvider(create: (_) => CustomerViewModel(SqliteCustomerRepository())),
           ChangeNotifierProvider(create: (_) => ProductViewModel(SqliteProductRepository())),
+          ChangeNotifierProvider(create: (_) => InvoiceViewModel(SqliteInvoiceRepository())),
         ],
         child: const InvoiceApp(),
       ),
