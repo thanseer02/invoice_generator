@@ -13,6 +13,7 @@ import '../../presentation/invoices/pdf_preview_screen.dart';
 import '../../presentation/reports/reports_dashboard_screen.dart';
 import '../../presentation/expenses/expenses_list_screen.dart';
 import '../../presentation/expenses/expense_form_screen.dart';
+import '../../presentation/settings/company_profile_screen.dart';
 import '../../domain/models/expense.dart';
 import '../providers/auth_provider.dart';
 
@@ -64,6 +65,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/reports',
         builder: (context, state) => const ReportsDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const CompanyProfileScreen(),
       ),
       GoRoute(
         path: '/expenses',

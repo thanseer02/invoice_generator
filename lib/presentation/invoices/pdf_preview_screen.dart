@@ -6,6 +6,7 @@ import 'package:printing/printing.dart';
 import '../../domain/models/invoice.dart';
 import '../../domain/models/customer.dart';
 import '../../services/pdf/pdf_generation_service.dart';
+import '../settings/settings_viewmodel.dart';
 import '../../services/pdf/pdf_export_service.dart';
 import 'invoice_viewmodel.dart';
 import '../customers/customer_viewmodel.dart';
@@ -27,6 +28,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
   Widget build(BuildContext context) {
     final invoiceVm = context.watch<InvoiceViewModel>();
     final customerVm = context.watch<CustomerViewModel>();
+    final settingsVm = context.watch<SettingsViewModel>();
 
     Invoice? invoice;
     try {
@@ -57,6 +59,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
         build: (format) => PdfGenerationService.generateInvoicePdf(
           invoice!,
           customer,
+          settingsVm.settings,
           template: _selectedTemplate,
         ),
         canChangeOrientation: false,

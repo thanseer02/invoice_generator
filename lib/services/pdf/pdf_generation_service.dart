@@ -9,13 +9,12 @@ enum PdfTemplate { classic, modern, minimal, corporate }
 class PdfGenerationService {
   static Future<Uint8List> generateInvoicePdf(
     Invoice invoice,
-    Customer? customer, {
+    Customer? customer,
+    Map<String, String> settings, {
     PdfTemplate template = PdfTemplate.classic,
-    String companyName = 'Antigravity Systems',
-    String companyEmail = 'billing@antigravity.dev',
-    String companyPhone = '+1 (555) 019-2837',
-    String companyAddress = '742 Evergreen Terrace, Springfield',
   }) async {
+    final companyName = settings['companyName'] ?? 'Antigravity Systems';
+    
     final pdf = pw.Document(
       title: 'Invoice ${invoice.invoiceNumber}',
       author: companyName,
@@ -30,16 +29,16 @@ class PdfGenerationService {
 
     switch (template) {
       case PdfTemplate.classic:
-        ClassicTemplate.build(pdf, theme, invoice, customer, companyName, companyEmail, companyPhone, companyAddress);
+        ClassicTemplate.build(pdf, theme, invoice, customer, settings);
         break;
       case PdfTemplate.modern:
-        ModernTemplate.build(pdf, theme, invoice, customer, companyName, companyEmail, companyPhone, companyAddress);
+        ModernTemplate.build(pdf, theme, invoice, customer, settings);
         break;
       case PdfTemplate.minimal:
-        MinimalTemplate.build(pdf, theme, invoice, customer, companyName, companyEmail, companyPhone, companyAddress);
+        MinimalTemplate.build(pdf, theme, invoice, customer, settings);
         break;
       case PdfTemplate.corporate:
-        CorporateTemplate.build(pdf, theme, invoice, customer, companyName, companyEmail, companyPhone, companyAddress);
+        CorporateTemplate.build(pdf, theme, invoice, customer, settings);
         break;
     }
 

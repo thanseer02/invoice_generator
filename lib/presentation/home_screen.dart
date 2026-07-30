@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_colors.dart';
@@ -26,6 +27,10 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Dashboard'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.push('/settings'),
+            ),
             IconButton(
               icon: const Icon(Icons.notifications_none),
               onPressed: () {},

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
@@ -5,7 +6,6 @@ import '../../domain/models/invoice.dart';
 import '../../domain/models/customer.dart';
 
 class PdfUtils {
-  static final currencyFormat = NumberFormat.currency(symbol: '\$');
   static final dateFormat = DateFormat.yMMMd();
 
   static pw.Widget buildHeader(String title, String invoiceNum, DateTime issueDate, DateTime dueDate, {PdfColor? color}) {
@@ -28,9 +28,30 @@ class PdfUtils {
   }
 
   static pw.Widget buildCompanyCustomerInfo(
-    String companyName, String companyEmail, String companyPhone, String companyAddress,
+    Map<String, String> settings,
     Customer? customer
   ) {
+    String cName = settings['companyName'] ?? 'Antigravity Systems';
+    String cAddress = settings['companyAddress'] ?? '';
+    String cEmail = settings['companyEmail'] ?? '';
+    String cPhone = settings['companyPhone'] ?? '';
+    String cGst = settings['companyGst'] ?? '';
+    String logoPath = settings['logoPath'] ?? '';
+
+    pw.Widget logoWidget = pw.SizedBox.shrink();
+    if (logoPath.isNotEmpty) {
+      try {
+        final imageBytes = File(logoPath).readAsBytesSync();
+        logoWidget = pw.Container(
+          margin: const pw.EdgeInsets.only(bottom: 10),
+          height: 50,
+          child: pw.Image(pw.MemoryImage(imageBytes)),
+        );
+      } catch (e) {
+        // Failed to load image
+      }
+    }
+
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -38,12 +59,14 @@ class PdfUtils {
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
+            logoWidget,
             pw.Text('From:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
             pw.SizedBox(height: 4),
-            pw.Text(companyName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.Text(companyAddress),
-            pw.Text(companyEmail),
-            pw.Text(companyPhone),
+            pw.Text(cName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            if (cAddress.isNotEmpty) pw.Text(cAddress),
+            if (cEmail.isNotEmpty) pw.Text(cEmail),
+            if (cPhone.isNotEmpty) pw.Text(cPhone),
+            if (cGst.isNotEmpty) pw.Text('GST: $cGst'),
           ],
         ),
         pw.Column(
@@ -61,10 +84,66 @@ class PdfUtils {
       ],
     );
   }
+
+  static pw.Widget buildPaymentDetails(Map<String, String> settings) {
+    String bankDetails = settings['bankDetails'] ?? '';
+    String upiId = settings['upiId'] ?? '';
+    String upiQrPath = settings['upiQrPath'] ?? '';
+
+    if (bankDetails.isEmpty && upiId.isEmpty && upiQrPath.isEmpty) {
+      return pw.SizedBox.shrink();
+    }
+
+    pw.Widget qrWidget = pw.SizedBox.shrink();
+    if (upiQrPath.isNotEmpty) {
+      try {
+        final imageBytes = File(upiQrPath).readAsBytesSync();
+        qrWidget = pw.Container(
+          height: 60,
+          width: 60,
+          child: pw.Image(pw.MemoryImage(imageBytes)),
+        );
+      } catch (e) {
+        // Failed to load QR
+      }
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Payment Details', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 8),
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  if (bankDetails.isNotEmpty) ...[
+                    pw.Text('Bank Transfer:', style: pw.TextStyle(color: PdfColors.grey700, fontSize: 10)),
+                    pw.Text(bankDetails),
+                    pw.SizedBox(height: 4),
+                  ],
+                  if (upiId.isNotEmpty) ...[
+                    pw.Text('UPI ID:', style: pw.TextStyle(color: PdfColors.grey700, fontSize: 10)),
+                    pw.Text(upiId),
+                  ],
+                ]
+              )
+            ),
+            if (upiQrPath.isNotEmpty) qrWidget,
+          ]
+        )
+      ]
+    );
+  }
 }
 
 class ClassicTemplate {
-  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, String cName, String cEmail, String cPhone, String cAddress) {
+  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, Map<String, String> settings) {
+    final currencyFormat = NumberFormat.currency(symbol: settings['defaultCurrency'] ?? '\$');
+
     pdf.addPage(pw.MultiPage(
       theme: theme,
       pageFormat: PdfPageFormat.a4,
@@ -79,11 +158,11 @@ class ClassicTemplate {
         child: pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey)),
       ),
       build: (context) => [
-        PdfUtils.buildCompanyCustomerInfo(cName, cEmail, cPhone, cAddress, customer),
+        PdfUtils.buildCompanyCustomerInfo(settings, customer),
         pw.SizedBox(height: 30),
         pw.TableHelper.fromTextArray(
           headers: ['Description', 'Qty', 'Unit Price', 'Total'],
-          data: invoice.items.map((i) => [i.description, i.quantity.toString(), PdfUtils.currencyFormat.format(i.unitPrice), PdfUtils.currencyFormat.format(i.total)]).toList(),
+          data: invoice.items.map((i) => [i.description, i.quantity.toString(), currencyFormat.format(i.unitPrice), currencyFormat.format(i.total)]).toList(),
           border: pw.TableBorder.all(color: PdfColors.grey300),
           headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
           headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xff2c3e50)),
@@ -96,29 +175,31 @@ class ClassicTemplate {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-              if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
-              if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+              pw.Text('Subtotal: ${currencyFormat.format(invoice.subtotal)}'),
+              if (invoice.discount > 0) pw.Text('Discount: -${currencyFormat.format(invoice.discount)}'),
+              if (invoice.taxAmount > 0) pw.Text('Tax: ${currencyFormat.format(invoice.taxAmount)}'),
               pw.Container(width: 120, child: pw.Divider(color: PdfColors.grey400)),
-              pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+              pw.Text('Total: ${currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
             ]
           )
         ),
         pw.SizedBox(height: 40),
-        _buildFooterNotes(invoice),
+        _buildFooterNotes(invoice, settings),
       ],
     ));
   }
 
-  static pw.Widget _buildFooterNotes(Invoice invoice) {
+  static pw.Widget _buildFooterNotes(Invoice invoice, Map<String, String> settings) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: pw.CrossAxisAlignment.end,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Expanded(
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              PdfUtils.buildPaymentDetails(settings),
+              pw.SizedBox(height: 10),
               if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
                 pw.Text('Notes:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                 pw.Text(invoice.notes!),
@@ -131,6 +212,7 @@ class ClassicTemplate {
             ]
           )
         ),
+        pw.SizedBox(width: 20),
         pw.Container(
           width: 60,
           height: 60,
@@ -142,7 +224,8 @@ class ClassicTemplate {
 }
 
 class ModernTemplate {
-  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, String cName, String cEmail, String cPhone, String cAddress) {
+  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, Map<String, String> settings) {
+    final currencyFormat = NumberFormat.currency(symbol: settings['defaultCurrency'] ?? '\$');
     final primaryColor = PdfColor.fromInt(0xff3b82f6);
     pdf.addPage(pw.MultiPage(
       theme: theme,
@@ -170,11 +253,11 @@ class ModernTemplate {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              PdfUtils.buildCompanyCustomerInfo(cName, cEmail, cPhone, cAddress, customer),
+              PdfUtils.buildCompanyCustomerInfo(settings, customer),
               pw.SizedBox(height: 30),
               pw.TableHelper.fromTextArray(
                 headers: ['Item', 'Qty', 'Price', 'Total'],
-                data: invoice.items.map((i) => [i.description, i.quantity.toString(), PdfUtils.currencyFormat.format(i.unitPrice), PdfUtils.currencyFormat.format(i.total)]).toList(),
+                data: invoice.items.map((i) => [i.description, i.quantity.toString(), currencyFormat.format(i.unitPrice), currencyFormat.format(i.total)]).toList(),
                 border: null,
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: primaryColor),
                 headerDecoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: primaryColor, width: 2))),
@@ -188,16 +271,16 @@ class ModernTemplate {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
-                    pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-                    if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
-                    if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+                    pw.Text('Subtotal: ${currencyFormat.format(invoice.subtotal)}'),
+                    if (invoice.discount > 0) pw.Text('Discount: -${currencyFormat.format(invoice.discount)}'),
+                    if (invoice.taxAmount > 0) pw.Text('Tax: ${currencyFormat.format(invoice.taxAmount)}'),
                     pw.SizedBox(height: 10),
-                    pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20, color: primaryColor)),
+                    pw.Text('Total: ${currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20, color: primaryColor)),
                   ]
                 )
               ),
               pw.SizedBox(height: 40),
-              ClassicTemplate._buildFooterNotes(invoice), // Reuse notes rendering
+              ClassicTemplate._buildFooterNotes(invoice, settings), // Reuse notes rendering
             ]
           )
         )
@@ -207,7 +290,8 @@ class ModernTemplate {
 }
 
 class MinimalTemplate {
-  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, String cName, String cEmail, String cPhone, String cAddress) {
+  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, Map<String, String> settings) {
+    final currencyFormat = NumberFormat.currency(symbol: settings['defaultCurrency'] ?? '\$');
     pdf.addPage(pw.MultiPage(
       theme: theme,
       pageFormat: PdfPageFormat.a4,
@@ -217,11 +301,11 @@ class MinimalTemplate {
         pw.SizedBox(height: 10),
         pw.Text(invoice.invoiceNumber, style: pw.TextStyle(fontSize: 18, color: PdfColors.grey)),
         pw.SizedBox(height: 40),
-        PdfUtils.buildCompanyCustomerInfo(cName, cEmail, cPhone, cAddress, customer),
+        PdfUtils.buildCompanyCustomerInfo(settings, customer),
         pw.SizedBox(height: 40),
         pw.TableHelper.fromTextArray(
           headers: ['Description', 'Qty', 'Price', 'Total'],
-          data: invoice.items.map((i) => [i.description, i.quantity.toString(), PdfUtils.currencyFormat.format(i.unitPrice), PdfUtils.currencyFormat.format(i.total)]).toList(),
+          data: invoice.items.map((i) => [i.description, i.quantity.toString(), currencyFormat.format(i.unitPrice), currencyFormat.format(i.total)]).toList(),
           border: null,
           headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
           cellAlignment: pw.Alignment.centerRight,
@@ -234,19 +318,20 @@ class MinimalTemplate {
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.SizedBox(height: 10),
-              pw.Text('Total due: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 24)),
+              pw.Text('Total due: ${currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 24)),
             ]
           )
         ),
         pw.SizedBox(height: 60),
-        ClassicTemplate._buildFooterNotes(invoice),
+        ClassicTemplate._buildFooterNotes(invoice, settings),
       ],
     ));
   }
 }
 
 class CorporateTemplate {
-  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, String cName, String cEmail, String cPhone, String cAddress) {
+  static void build(pw.Document pdf, pw.ThemeData theme, Invoice invoice, Customer? customer, Map<String, String> settings) {
+    final currencyFormat = NumberFormat.currency(symbol: settings['defaultCurrency'] ?? '\$');
     pdf.addPage(pw.MultiPage(
       theme: theme,
       pageFormat: PdfPageFormat.a4,
@@ -267,7 +352,7 @@ class CorporateTemplate {
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text(cName, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.Text(settings['companyName'] ?? 'Antigravity Systems', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
             pw.Container(width: 100, height: 30, child: pw.BarcodeWidget(barcode: pw.Barcode.code128(), data: invoice.invoiceNumber)),
           ]
         ),
@@ -301,7 +386,7 @@ class CorporateTemplate {
         pw.SizedBox(height: 30),
         pw.TableHelper.fromTextArray(
           headers: ['Description', 'Qty', 'Unit Price', 'Total'],
-          data: invoice.items.map((i) => [i.description, i.quantity.toString(), PdfUtils.currencyFormat.format(i.unitPrice), PdfUtils.currencyFormat.format(i.total)]).toList(),
+          data: invoice.items.map((i) => [i.description, i.quantity.toString(), currencyFormat.format(i.unitPrice), currencyFormat.format(i.total)]).toList(),
           border: pw.TableBorder.symmetric(inside: const pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
           headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.black),
           headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
@@ -314,11 +399,11 @@ class CorporateTemplate {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('Subtotal: ${PdfUtils.currencyFormat.format(invoice.subtotal)}'),
-              if (invoice.discount > 0) pw.Text('Discount: -${PdfUtils.currencyFormat.format(invoice.discount)}'),
-              if (invoice.taxAmount > 0) pw.Text('Tax: ${PdfUtils.currencyFormat.format(invoice.taxAmount)}'),
+              pw.Text('Subtotal: ${currencyFormat.format(invoice.subtotal)}'),
+              if (invoice.discount > 0) pw.Text('Discount: -${currencyFormat.format(invoice.discount)}'),
+              if (invoice.taxAmount > 0) pw.Text('Tax: ${currencyFormat.format(invoice.taxAmount)}'),
               pw.Container(width: 150, child: pw.Divider()),
-              pw.Text('Total: ${PdfUtils.currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+              pw.Text('Total: ${currencyFormat.format(invoice.total)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
             ]
           )
         ),
@@ -331,6 +416,8 @@ class CorporateTemplate {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
+                  PdfUtils.buildPaymentDetails(settings),
+                  pw.SizedBox(height: 10),
                   pw.Text('Terms & Conditions', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                   pw.Text(invoice.terms ?? 'Please pay within the due date.'),
                 ]
