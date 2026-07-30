@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:invoice_genarator/data/repositories/firebase_auth_repository.dart';
+import 'package:invoice_genarator/data/repositories/sqlite_expense_repository.dart';
 import 'package:provider/provider.dart';
-
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/logging/logger.dart';
@@ -14,6 +14,7 @@ import 'data/repositories/sqlite_invoice_repository.dart';
 import 'presentation/customers/customer_viewmodel.dart';
 import 'presentation/products/product_viewmodel.dart';
 import 'presentation/invoices/invoice_viewmodel.dart';
+import 'presentation/expenses/expense_viewmodel.dart';
 // import 'package:firebase_core/firebase_core.dart'; // TODO: Uncomment when Firebase config is generated
 import 'package:go_router/go_router.dart';
 
@@ -31,6 +32,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => CustomerViewModel(SqliteCustomerRepository())),
           ChangeNotifierProvider(create: (_) => ProductViewModel(SqliteProductRepository())),
           ChangeNotifierProvider(create: (_) => InvoiceViewModel(SqliteInvoiceRepository())),
+          ChangeNotifierProvider(create: (_) => ExpenseViewModel(SqliteExpenseRepository())),
         ],
         child: const InvoiceApp(),
       ),

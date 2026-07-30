@@ -57,7 +57,7 @@ class QuickActionsPanel extends StatelessWidget {
               ActionChip(
                 label: const Text('Log Expense'),
                 avatar: const Icon(Icons.money_off, size: 16),
-                onPressed: () {},
+                onPressed: () => context.push('/expenses'),
               ),
             ],
           ),
