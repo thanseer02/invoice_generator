@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/repositories/invoice_repository.dart';
 import '../../domain/repositories/expense_repository.dart';
+import '../../domain/models/report_models.dart';
+import '../../services/reporting/reporting_service.dart';
 
 class DashboardViewModel extends ChangeNotifier {
   final InvoiceRepository invoiceRepo;
@@ -24,14 +26,29 @@ class DashboardViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    // Generate dummy dashboard data for now
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    todaysSales = 1250.00;
-    monthlySales = 14500.50;
-    pendingAmount = 3200.00;
-    paidAmount = 11300.50;
-    invoiceCount = 42;
+    try {
+      final invoices = await invoiceRepo.getAllInvoices();
+      final expenses = await expenseRepo.getAllExpenses();
+
+      final reporting = ReportingService(
+        invoices: invoices,
+        expenses: expenses,
+        customers: [], // Not needed for revenue stats
+        products: [],  // Not needed for revenue stats
+      );
+
+      final dailyRevenue = reporting.generateRevenueReport(TimePeriod.daily);
+      final monthlyRevenue = reporting.generateRevenueReport(TimePeriod.monthly);
+      final allTimeRevenue = reporting.generateRevenueReport(TimePeriod.allTime);
+
+      todaysSales = dailyRevenue.totalRevenue;
+      monthlySales = monthlyRevenue.totalRevenue;
+      pendingAmount = allTimeRevenue.pendingRevenue;
+      paidAmount = allTimeRevenue.collectedRevenue;
+      invoiceCount = allTimeRevenue.invoiceCount;
+    } catch (e) {
+      debugPrint('Error loading dashboard data: $e');
+    }
 
     isLoading = false;
     notifyListeners();

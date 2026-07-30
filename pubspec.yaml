@@ -59,6 +59,7 @@ dependencies:
   flutter_animate: ^4.5.2
   url_launcher: ^6.3.2
   csv: ^8.0.0
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:

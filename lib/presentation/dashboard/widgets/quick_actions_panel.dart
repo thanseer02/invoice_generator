@@ -50,6 +50,11 @@ class QuickActionsPanel extends StatelessWidget {
                 onPressed: () => context.push('/products'),
               ),
               ActionChip(
+                label: const Text('View Reports'),
+                avatar: const Icon(Icons.analytics, size: 16),
+                onPressed: () => context.push('/reports'),
+              ),
+              ActionChip(
                 label: const Text('Log Expense'),
                 avatar: const Icon(Icons.money_off, size: 16),
                 onPressed: () {},

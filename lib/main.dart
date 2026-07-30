@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:invoice_genarator/data/repositories/firebase_auth_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
@@ -7,7 +8,6 @@ import 'core/router/app_router.dart';
 import 'core/logging/logger.dart';
 import 'core/error/error_handler.dart';
 import 'core/providers/auth_provider.dart';
-import 'data/repositories/firebase_auth_repository.dart';
 import 'data/repositories/sqlite_customer_repository.dart';
 import 'data/repositories/sqlite_product_repository.dart';
 import 'data/repositories/sqlite_invoice_repository.dart';

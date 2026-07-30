@@ -10,6 +10,7 @@ import '../../presentation/invoices/invoices_list_screen.dart';
 import '../../presentation/invoices/invoice_form_screen.dart';
 import '../../presentation/invoices/invoice_detail_screen.dart';
 import '../../presentation/invoices/pdf_preview_screen.dart';
+import '../../presentation/reports/reports_dashboard_screen.dart';
 import '../providers/auth_provider.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
@@ -56,6 +57,10 @@ GoRouter createRouter(AuthProvider authProvider) {
             builder: (context, state) => ProductFormScreen(productId: state.pathParameters['id']),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/reports',
+        builder: (context, state) => const ReportsDashboardScreen(),
       ),
       GoRoute(
         path: '/invoices',
