@@ -34,6 +34,10 @@ class SettingsViewModel extends ChangeNotifier {
       _settings['requirePin'] ??= 'false';
       _settings['useBiometric'] ??= 'false';
       _settings['appPin'] ??= '';
+      
+      _settings['autoBackupFrequency'] ??= 'never'; // never, daily, weekly
+      _settings['lastBackupTimestamp'] ??= '';
+      _settings['dbLastModifiedTimestamp'] ??= DateTime.now().toIso8601String();
     } catch (e) {
       debugPrint('Error loading settings: $e');
     }
@@ -82,4 +86,12 @@ class SettingsViewModel extends ChangeNotifier {
   bool get requirePin => _settings['requirePin'] == 'true';
   bool get useBiometric => _settings['useBiometric'] == 'true';
   String get appPin => _settings['appPin'] ?? '';
+  
+  String get autoBackupFrequency => _settings['autoBackupFrequency'] ?? 'never';
+  String get lastBackupTimestamp => _settings['lastBackupTimestamp'] ?? '';
+  String get dbLastModifiedTimestamp => _settings['dbLastModifiedTimestamp'] ?? DateTime.now().toIso8601String();
+  
+  Future<void> updateDbLastModified() async {
+    await saveSetting('dbLastModifiedTimestamp', DateTime.now().toIso8601String());
+  }
 }

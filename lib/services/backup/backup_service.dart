@@ -4,6 +4,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
+import 'cloud_backup_provider.dart';
+import '../../presentation/settings/settings_viewmodel.dart';
 
 class BackupService {
   static const _dbName = "invoice_generator.db";
@@ -49,5 +51,39 @@ class BackupService {
       debugPrint('Restore error: $e');
     }
     return false;
+  }
+
+  static Future<void> backupToCloud(CloudBackupProvider provider, SettingsViewModel vm) async {
+    if (kIsWeb) return;
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, _dbName);
+    final file = File(path);
+    if (!await file.exists()) return;
+
+    if (!provider.isAuthenticated) {
+      final success = await provider.authenticate();
+      if (!success) throw Exception('Authentication failed');
+    }
+
+    final uploaded = await provider.uploadBackup(file);
+    if (uploaded) {
+      await vm.saveSetting('lastBackupTimestamp', DateTime.now().toIso8601String());
+    } else {
+      throw Exception('Upload failed');
+    }
+  }
+
+  static Future<bool> checkConflict(CloudBackupProvider provider, SettingsViewModel vm) async {
+    if (!provider.isAuthenticated) {
+      await provider.authenticate();
+    }
+    final cloudDate = await provider.getLastBackupTimestamp();
+    if (cloudDate == null) return false; // No cloud backup to conflict with
+
+    final localDateStr = vm.dbLastModifiedTimestamp;
+    final localDate = DateTime.tryParse(localDateStr) ?? DateTime.now();
+
+    // If local database was modified AFTER the cloud backup was created, there is a conflict
+    return localDate.isAfter(cloudDate);
   }
 }

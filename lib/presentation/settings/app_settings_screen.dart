@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'settings_viewmodel.dart';
-import '../../services/backup/backup_service.dart';
 import '../../widgets/feedback/app_snackbar.dart';
 import '../../core/theme/app_spacing.dart';
 
@@ -76,48 +76,13 @@ class AppSettingsScreen extends StatelessWidget {
             },
           ),
           const Divider(),
-          _buildSectionTitle(context, 'Data & Backup'),
+          _buildSectionTitle(context, 'Data & Sync'),
           ListTile(
-            leading: const Icon(Icons.cloud_upload),
-            title: const Text('Backup Database'),
-            subtitle: const Text('Export your local SQLite database'),
-            onTap: () async {
-              try {
-                await BackupService.backupDatabase();
-              } catch (e) {
-                if (context.mounted) {
-                  AppSnackbar.showError(context, 'Backup failed: $e');
-                }
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cloud_download),
-            title: const Text('Restore Database'),
-            subtitle: const Text('Import a previously exported .db file'),
-            onTap: () async {
-              final success = await BackupService.restoreDatabase();
-              if (success && context.mounted) {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Restore Successful'),
-                    content: const Text('The database has been restored. Please completely close and restart the app to see the changes.'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))
-                    ],
-                  ),
-                );
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.sync),
-            title: const Text('Cloud Sync'),
-            subtitle: const Text('Firebase connection pending'),
-            onTap: () {
-              AppSnackbar.showSuccess(context, 'Cloud Sync will be available after Firebase configuration.');
-            },
+            leading: const Icon(Icons.cloud_sync),
+            title: const Text('Backup & Restore'),
+            subtitle: const Text('Google Drive, Dropbox, Auto-backups'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/backup-settings'),
           ),
           const Divider(),
           _buildSectionTitle(context, 'System'),
