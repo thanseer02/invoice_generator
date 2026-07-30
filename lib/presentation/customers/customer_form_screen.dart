@@ -30,7 +30,6 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   late final TextEditingController _notesController;
 
   Customer? _existingCustomer;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -60,7 +59,6 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         // Not found
       }
     }
-    setState(() => _isLoading = false);
   }
 
   @override
@@ -104,8 +102,6 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-
     return Scaffold(
       appBar: AppBar(
         title: Text(_existingCustomer != null ? 'Edit Customer' : 'Add Customer'),

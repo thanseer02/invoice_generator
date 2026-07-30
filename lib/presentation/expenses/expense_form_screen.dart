@@ -24,10 +24,10 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   
-  String _selectedCategory = 'Other';
-  DateTime _expenseDate = DateTime.now();
-  String? _receiptPath;
-  bool _isOcrProcessing = false;
+  final _categoryNotifier = ValueNotifier<String>('Other');
+  final _dateNotifier = ValueNotifier<DateTime>(DateTime.now());
+  final _receiptNotifier = ValueNotifier<String?>(null);
+  final _ocrProcessingNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -35,11 +35,17 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     if (widget.expense != null) {
       _amountController.text = widget.expense!.amount.toString();
       _notesController.text = widget.expense!.notes ?? '';
-      _selectedCategory = widget.expense!.category;
-      _expenseDate = widget.expense!.expenseDate;
-      _receiptPath = widget.expense!.receiptPath;
+      _categoryNotifier.value = widget.expense!.category;
+      _dateNotifier.value = widget.expense!.expenseDate;
+      _receiptNotifier.value = widget.expense!.receiptPath;
     } else {
-      _selectedCategory = context.read<ExpenseViewModel>().categories.first;
+      // Must read outside of initState, but since categories are likely loaded, we can delay it
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final categories = context.read<ExpenseViewModel>().categories;
+          if (categories.isNotEmpty) _categoryNotifier.value = categories.first;
+        }
+      });
     }
   }
 
@@ -47,6 +53,10 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   void dispose() {
     _amountController.dispose();
     _notesController.dispose();
+    _categoryNotifier.dispose();
+    _dateNotifier.dispose();
+    _receiptNotifier.dispose();
+    _ocrProcessingNotifier.dispose();
     super.dispose();
   }
 
@@ -55,23 +65,20 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     
     if (pickedFile != null) {
-      setState(() {
-        _receiptPath = pickedFile.path;
-      });
+      _receiptNotifier.value = pickedFile.path;
     }
   }
 
   Future<void> _runOcr() async {
-    if (_receiptPath == null) return;
+    final path = _receiptNotifier.value;
+    if (path == null) return;
     
-    setState(() => _isOcrProcessing = true);
+    _ocrProcessingNotifier.value = true;
     
     try {
-      final amount = await OcrService.extractTotalAmountFromImage(_receiptPath!);
+      final amount = await OcrService.extractTotalAmountFromImage(path);
       if (amount != null && mounted) {
-        setState(() {
-          _amountController.text = amount.toStringAsFixed(2);
-        });
+        _amountController.text = amount.toStringAsFixed(2);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Amount extracted successfully!')),
         );
@@ -84,7 +91,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isOcrProcessing = false);
+        _ocrProcessingNotifier.value = false;
       }
     }
   }
@@ -96,11 +103,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     
     final expense = Expense(
       id: widget.expense?.id ?? const Uuid().v4(),
-      category: _selectedCategory,
+      category: _categoryNotifier.value,
       amount: amount,
-      expenseDate: _expenseDate,
+      expenseDate: _dateNotifier.value,
       notes: _notesController.text,
-      receiptPath: _receiptPath,
+      receiptPath: _receiptNotifier.value,
       createdAt: widget.expense?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -155,34 +162,44 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
               
-              DropdownButtonFormField<String>(
-                initialValue: categories.contains(_selectedCategory) ? _selectedCategory : categories.first,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedCategory = val);
+              ValueListenableBuilder<String>(
+                valueListenable: _categoryNotifier,
+                builder: (context, cat, _) {
+                  return DropdownButtonFormField<String>(
+                    initialValue: categories.contains(cat) ? cat : (categories.isNotEmpty ? categories.first : null),
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                    onChanged: (val) {
+                      if (val != null) _categoryNotifier.value = val;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.lg),
               
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Date'),
-                subtitle: Text(DateFormat.yMMMd().format(_expenseDate)),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _expenseDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
+              ValueListenableBuilder<DateTime>(
+                valueListenable: _dateNotifier,
+                builder: (context, dateVal, _) {
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Date'),
+                    subtitle: Text(DateFormat.yMMMd().format(dateVal)),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: dateVal,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (date != null) {
+                        _dateNotifier.value = date;
+                      }
+                    },
                   );
-                  if (date != null) {
-                    setState(() => _expenseDate = date);
-                  }
                 },
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -203,71 +220,81 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   }
 
   Widget _buildReceiptSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ValueListenableBuilder<String?>(
+      valueListenable: _receiptNotifier,
+      builder: (context, receiptPath, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Receipt', style: Theme.of(context).textTheme.titleMedium),
-            TextButton.icon(
-              onPressed: _pickImage,
-              icon: const Icon(Icons.image),
-              label: const Text('Attach'),
-            ),
-          ],
-        ),
-        if (_receiptPath != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Container(
-            height: 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              fit: StackFit.expand,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    File(_receiptPath!),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.error)),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black54,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white, size: 18),
-                      onPressed: () => setState(() => _receiptPath = null),
-                    ),
-                  ),
+                Text('Receipt', style: Theme.of(context).textTheme.titleMedium),
+                TextButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: const Text('Attach'),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isOcrProcessing ? null : _runOcr,
-              icon: _isOcrProcessing 
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.document_scanner),
-              label: Text(_isOcrProcessing ? 'Scanning...' : 'Scan with OCR'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+            if (receiptPath != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                height: 150,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(receiptPath),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.error)),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                          onPressed: () => _receiptNotifier.value = null,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
-      ],
+              const SizedBox(height: AppSpacing.md),
+              ValueListenableBuilder<bool>(
+                valueListenable: _ocrProcessingNotifier,
+                builder: (context, isOcrProcessing, _) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isOcrProcessing ? null : _runOcr,
+                      icon: isOcrProcessing 
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.document_scanner),
+                      label: Text(isOcrProcessing ? 'Scanning...' : 'Scan with OCR'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }

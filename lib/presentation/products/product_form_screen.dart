@@ -35,9 +35,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   late final TextEditingController _unitController;
   late final TextEditingController _categoryController;
 
-  String? _imagePath;
+  final ValueNotifier<String?> _imagePathNotifier = ValueNotifier(null);
   Product? _existingProduct;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -69,12 +68,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         _discountController.text = _existingProduct!.discount.toString();
         _unitController.text = _existingProduct!.unit ?? '';
         _categoryController.text = _existingProduct!.category ?? '';
-        _imagePath = _existingProduct!.imagePath;
+        _imagePathNotifier.value = _existingProduct!.imagePath;
       } catch (e) {
         // Not found
       }
     }
-    setState(() => _isLoading = false);
   }
 
   @override
@@ -88,6 +86,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _discountController.dispose();
     _unitController.dispose();
     _categoryController.dispose();
+    _imagePathNotifier.dispose();
     super.dispose();
   }
 
@@ -95,9 +94,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        _imagePath = pickedFile.path;
-      });
+      _imagePathNotifier.value = pickedFile.path;
     }
   }
 
@@ -116,7 +113,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         discount: double.tryParse(_discountController.text.trim()) ?? 0.0,
         unit: _unitController.text.trim().isEmpty ? null : _unitController.text.trim(),
         category: _categoryController.text.trim().isEmpty ? null : _categoryController.text.trim(),
-        imagePath: _imagePath,
+        imagePath: _imagePathNotifier.value,
         createdAt: _existingProduct?.createdAt ?? DateTime.now(),
       );
 
@@ -134,8 +131,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-
     return Scaffold(
       appBar: AppBar(
         title: Text(_existingProduct != null ? 'Edit Product' : 'Add Product'),
@@ -240,35 +235,40 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   Widget _buildImagePicker() {
-    return Center(
-      child: GestureDetector(
-        onTap: _pickImage,
-        child: Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-            image: _imagePath != null
-                ? DecorationImage(
-                    image: FileImage(File(_imagePath!)),
-                    fit: BoxFit.cover,
-                  )
-                : null,
+    return ValueListenableBuilder<String?>(
+      valueListenable: _imagePathNotifier,
+      builder: (context, imagePath, _) {
+        return Center(
+          child: GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                image: imagePath != null
+                    ? DecorationImage(
+                        image: FileImage(File(imagePath)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: imagePath == null
+                  ? const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_a_photo, color: AppColors.primary, size: 32),
+                        SizedBox(height: 8),
+                        Text('Add Photo', style: TextStyle(color: AppColors.primary, fontSize: 12)),
+                      ],
+                    )
+                  : null,
+            ),
           ),
-          child: _imagePath == null
-              ? const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_a_photo, color: AppColors.primary, size: 32),
-                    SizedBox(height: 8),
-                    Text('Add Photo', style: TextStyle(color: AppColors.primary, fontSize: 12)),
-                  ],
-                )
-              : null,
-        ),
-      ),
+        );
+      },
     );
   }
 }
