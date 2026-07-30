@@ -120,7 +120,7 @@ class _LockScreenState extends State<LockScreen> {
           width: 80,
           height: 80,
           alignment: Alignment.center,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey.withOpacity(0.1)),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey.withValues(alpha: 0.1)),
           child: Text(digit, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         ),
       ),

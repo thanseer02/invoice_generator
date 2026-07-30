@@ -85,7 +85,9 @@ class AppSettingsScreen extends StatelessWidget {
               try {
                 await BackupService.backupDatabase();
               } catch (e) {
-                AppSnackbar.showError(context, 'Backup failed: $e');
+                if (context.mounted) {
+                  AppSnackbar.showError(context, 'Backup failed: $e');
+                }
               }
             },
           ),
