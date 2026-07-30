@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static const _databaseName = "invoice_generator.db";
-  static const _databaseVersion = 4;
+  static const _databaseVersion = 5;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -86,6 +86,8 @@ class DatabaseHelper {
         notes TEXT,
         terms TEXT,
         currency TEXT NOT NULL DEFAULT 'USD',
+        isRecurring INTEGER DEFAULT 0,
+        recurringFrequency TEXT,
         createdAt TEXT,
         updatedAt TEXT,
         FOREIGN KEY (customerId) REFERENCES customers (id)

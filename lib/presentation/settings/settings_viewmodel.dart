@@ -38,6 +38,7 @@ class SettingsViewModel extends ChangeNotifier {
       _settings['autoBackupFrequency'] ??= 'never'; // never, daily, weekly
       _settings['lastBackupTimestamp'] ??= '';
       _settings['dbLastModifiedTimestamp'] ??= DateTime.now().toIso8601String();
+      _settings['notificationsEnabled'] ??= 'true';
     } catch (e) {
       debugPrint('Error loading settings: $e');
     }
@@ -90,6 +91,7 @@ class SettingsViewModel extends ChangeNotifier {
   String get autoBackupFrequency => _settings['autoBackupFrequency'] ?? 'never';
   String get lastBackupTimestamp => _settings['lastBackupTimestamp'] ?? '';
   String get dbLastModifiedTimestamp => _settings['dbLastModifiedTimestamp'] ?? DateTime.now().toIso8601String();
+  bool get notificationsEnabled => _settings['notificationsEnabled'] == 'true';
   
   Future<void> updateDbLastModified() async {
     await saveSetting('dbLastModifiedTimestamp', DateTime.now().toIso8601String());

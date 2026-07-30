@@ -16,6 +16,7 @@ import '../../presentation/expenses/expense_form_screen.dart';
 import '../../presentation/settings/company_profile_screen.dart';
 import '../../presentation/settings/app_settings_screen.dart';
 import '../../presentation/settings/backup_settings_screen.dart';
+import '../../presentation/settings/notification_settings_screen.dart';
 import '../../presentation/settings/lock_screen.dart';
 import '../../domain/models/expense.dart';
 import '../providers/auth_provider.dart';
@@ -80,6 +81,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/backup-settings',
         builder: (context, state) => const BackupSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/notification-settings',
+        builder: (context, state) => const NotificationSettingsScreen(),
       ),
       GoRoute(
         path: '/lock',

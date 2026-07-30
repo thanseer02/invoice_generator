@@ -19,6 +19,8 @@ class Invoice {
   final List<InvoiceItem> items;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool isRecurring;
+  final String? recurringFrequency;
 
   Invoice({
     required this.id,
@@ -37,6 +39,8 @@ class Invoice {
     this.items = const [],
     this.createdAt,
     this.updatedAt,
+    this.isRecurring = false,
+    this.recurringFrequency,
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
@@ -63,6 +67,8 @@ class Invoice {
           const [],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
+      isRecurring: json['isRecurring'] == 1 || json['isRecurring'] == true,
+      recurringFrequency: json['recurringFrequency'] as String?,
     );
   }
 
@@ -84,6 +90,8 @@ class Invoice {
       'items': items.map((e) => e.toJson()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isRecurring': isRecurring ? 1 : 0,
+      'recurringFrequency': recurringFrequency,
     };
   }
 
@@ -104,6 +112,8 @@ class Invoice {
     List<InvoiceItem>? items,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isRecurring,
+    String? recurringFrequency,
   }) {
     return Invoice(
       id: id ?? this.id,
@@ -122,6 +132,8 @@ class Invoice {
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurringFrequency: recurringFrequency ?? this.recurringFrequency,
     );
   }
 }

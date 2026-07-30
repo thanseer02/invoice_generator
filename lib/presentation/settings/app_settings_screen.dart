@@ -89,9 +89,8 @@ class AppSettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.notifications),
             title: const Text('Notifications'),
-            onTap: () {
-              AppSnackbar.showSuccess(context, 'Notification settings coming soon.');
-            },
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/notification-settings'),
           ),
           ListTile(
             leading: const Icon(Icons.info),

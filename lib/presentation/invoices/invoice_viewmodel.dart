@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/models/invoice.dart';
 import '../../domain/repositories/invoice_repository.dart';
+import '../../domain/models/invoice_item.dart';
+import '../../services/notifications/notification_service.dart';
 
 class InvoiceViewModel extends ChangeNotifier {
   final InvoiceRepository _repository;
@@ -61,17 +63,26 @@ class InvoiceViewModel extends ChangeNotifier {
   Future<void> addInvoice(Invoice invoice) async {
     final newInvoice = invoice.copyWith(createdAt: DateTime.now(), updatedAt: DateTime.now());
     await _repository.createInvoice(newInvoice);
+    await NotificationService().scheduleInvoiceReminder(newInvoice);
     await loadInvoices();
   }
 
   Future<void> updateInvoice(Invoice invoice) async {
     final updatedInvoice = invoice.copyWith(updatedAt: DateTime.now());
     await _repository.updateInvoice(updatedInvoice);
+    
+    if (invoice.status == InvoiceStatus.paid || invoice.status == InvoiceStatus.cancelled) {
+      await NotificationService().cancelReminder(invoice.id);
+    } else {
+      await NotificationService().scheduleInvoiceReminder(invoice);
+    }
+    
     await loadInvoices();
   }
 
   Future<void> deleteInvoice(String id) async {
     await _repository.deleteInvoice(id);
+    await NotificationService().cancelReminder(id);
     await loadInvoices();
   }
 
