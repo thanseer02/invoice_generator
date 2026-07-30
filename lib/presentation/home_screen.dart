@@ -50,6 +50,14 @@ class HomeScreen extends StatelessWidget {
                 child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
               ListTile(
+                leading: const Icon(Icons.analytics),
+                title: const Text('Analytics & Reports'),
+                onTap: () {
+                  Navigator.pop(context); // close drawer
+                  context.push('/analytics');
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.settings_applications),
                 title: const Text('App Settings'),
                 onTap: () {

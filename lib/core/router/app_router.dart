@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../../presentation/home_screen.dart';
+import '../../presentation/analytics/analytics_screen.dart';
 import '../../presentation/auth/login_screen.dart';
 import '../../presentation/customers/customers_list_screen.dart';
 import '../../presentation/customers/customer_form_screen.dart';
@@ -33,6 +34,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
       ),
       GoRoute(
         path: '/customers',
